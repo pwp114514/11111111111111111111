@@ -18,9 +18,7 @@ import flash.media.Sound;
 import haxe.Json;
 
 
-#if MODS_ALLOWED
 import backend.Mods;
-#end
 
 class Paths
 {
@@ -440,7 +438,6 @@ class Paths
 		return currentTrackedSounds.get(gottenPath);
 	}
 
-	#if MODS_ALLOWED
 	inline static public function mods(key:String = '') {
 		return 'mods/' + key;
 	}
@@ -502,7 +499,6 @@ class Paths
 		}
 		return 'mods/' + key;
 	}
-	#end
 
 	#if flxanimate
 	public static function loadAnimateAtlas(spr:FlxAnimate, folderOrImg:Dynamic, spriteJson:Dynamic = null, animationJson:Dynamic = null)

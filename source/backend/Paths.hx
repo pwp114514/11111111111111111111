@@ -305,25 +305,46 @@ class Paths
 
 		if (bitmap != null)
 		{
-			localTrackedAssets.push(file);
-			if (allowGPU && ClientPrefs.data.cacheOnGPU)
-			{
-				var texture:RectangleTexture = FlxG.stage.context3D.createRectangleTexture(bitmap.width, bitmap.height, BGRA, true);
-				texture.uploadFromBitmapData(bitmap);
-				bitmap.image.data = null;
-				bitmap.dispose();
-				bitmap.disposeImage();
-				bitmap = BitmapData.fromTexture(texture);
-			}
-			var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, file);
-			newGraphic.persist = true;
-			newGraphic.destroyOnNoUse = false;
-			currentTrackedAssets.set(file, newGraphic);
-			return newGraphic;
+			var retVal = cacheBitmap(file, bitmap, allowGPU);
+			if(retVal != null) return retVal;
 		}
 
 		trace('oh no its returning null NOOOO ($file)');
 		return null;
+	}
+
+	static public function cacheBitmap(file:String, ?bitmap:BitmapData = null, ?allowGPU:Bool = true)
+	{
+		if(bitmap == null)
+		{
+			#if MODS_ALLOWED
+			if (FileSystem.exists(file))
+				bitmap = BitmapData.fromFile(file);
+			else
+			#end
+			{
+				if (OpenFlAssets.exists(file, IMAGE))
+					bitmap = OpenFlAssets.getBitmapData(file);
+			}
+
+			if(bitmap == null) return null;
+		}
+
+		localTrackedAssets.push(file);
+		if (allowGPU && ClientPrefs.data.cacheOnGPU)
+		{
+			var texture:RectangleTexture = FlxG.stage.context3D.createRectangleTexture(bitmap.width, bitmap.height, BGRA, true);
+			texture.uploadFromBitmapData(bitmap);
+			bitmap.image.data = null;
+			bitmap.dispose();
+			bitmap.disposeImage();
+			bitmap = BitmapData.fromTexture(texture);
+		}
+		var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, file);
+		newGraphic.persist = true;
+		newGraphic.destroyOnNoUse = false;
+		currentTrackedAssets.set(file, newGraphic);
+		return newGraphic;
 	}
 	
 	static public function getTextFromFile(key:String, ?ignoreMods:Bool = false):String

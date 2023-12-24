@@ -508,6 +508,7 @@ class Paths
 		return FlxAtlasFrames.fromTexturePackerJson(image(key, library, allowGPU), getPath('images/$key.json', library));
 		#end
 	}
+	#end
 
 	inline static public function formatToSongPath(path:String) {
 		var invalidChars = ~/[~&\\;:<>#]/;

@@ -203,6 +203,11 @@ class Paths
 		return returnPath;
 	}
 
+	inline public static function getSharedPath(file:String = '')
+	{
+		return SUtil.getPath() + 'assets/shared/$file';
+	}
+	
 	inline public static function getPreloadPath(file:String = '')
 		return 'assets/$file';
 

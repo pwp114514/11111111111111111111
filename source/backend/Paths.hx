@@ -552,7 +552,7 @@ class Paths
 		return currentTrackedSounds.get(gottenPath);
 	}
 	
-	#if MODS_ALLOWED
+	
 	inline static public function mods(key:String = '')
 		return SUtil.getPath() + 'mods/' + key;
 	
@@ -605,5 +605,4 @@ class Paths
 			return fileToCheck;
 		return SUtil.getPath() + 'mods/' + key;	
 	}
-	#end
 }

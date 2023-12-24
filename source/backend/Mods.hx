@@ -1,6 +1,13 @@
 package backend;
 
-import haxe.Json;
+#if sys
+import sys.FileSystem;
+import sys.io.File;
+#else
+import lime.utils.Assets;
+#end
+
+import tjson.TJSON as Json;
 
 typedef ModsList = {
 	enabled:Array<String>,
@@ -29,7 +36,7 @@ class Mods
 		'achievements'
 	];
 
-	private static var globalMods:Array<String> = [];
+	public static var globalMods:Array<String> = [];
 
 	inline public static function getGlobalMods()
 		return globalMods;
@@ -54,17 +61,17 @@ class Mods
 			for (folder in FileSystem.readDirectory(modsFolder))
 			{
 				var path = haxe.io.Path.join([modsFolder, folder]);
-				if (FileSystem.isDirectory(path) && !ignoreModFolders.contains(folder.toLowerCase()) && !list.contains(folder))
+				if (sys.FileSystem.isDirectory(path) && !ignoreModFolders.contains(folder.toLowerCase()) && !list.contains(folder))
 					list.push(folder);
 			}
 		}
 		#end
 		return list;
 	}
-	
+
 	inline public static function mergeAllTextsNamed(path:String, defaultDirectory:String = null, allowDuplicates:Bool = false)
 	{
-		if(defaultDirectory == null) defaultDirectory = Paths.getSharedPath();
+		if(defaultDirectory == null) defaultDirectory = Paths.getPreloadPath();
 		defaultDirectory = defaultDirectory.trim();
 		if(!defaultDirectory.endsWith('/')) defaultDirectory += '/';
 		if(!defaultDirectory.startsWith('assets/')) defaultDirectory = 'assets/$defaultDirectory';
@@ -76,12 +83,12 @@ class Mods
 		if(paths.contains(defaultPath))
 		{
 			paths.remove(defaultPath);
-			paths.insert(0, defaultPath);
+			paths.push(defaultPath);
 		}
 
 		for (file in paths)
 		{
-			var list:Array<String> = CoolUtil.coolTextFile(file);
+			var list:Array<String> = CoolUtil.coolTextFile(file, false);
 			for (value in list)
 				if((allowDuplicates || !mergedList.contains(value)) && value.length > 0)
 					mergedList.push(value);
@@ -135,7 +142,7 @@ class Mods
 				#else
 				var rawJson:String = Assets.getText(path);
 				#end
-				if(rawJson != null && rawJson.length > 0) return tjson.TJSON.parse(rawJson);
+				if(rawJson != null && rawJson.length > 0) return Json.parse(rawJson);
 			} catch(e:Dynamic) {
 				trace(e);
 			}
@@ -145,7 +152,8 @@ class Mods
 	}
 
 	public static var updatedOnState:Bool = false;
-	inline public static function parseList():ModsList {
+	inline public static function parseList():ModsList
+	{
 		if(!updatedOnState) updateModList();
 		var list:ModsList = {enabled: [], disabled: [], all: []};
 
@@ -155,7 +163,6 @@ class Mods
 			{
 				//trace('Mod: $mod');
 				if(mod.trim().length < 1) continue;
-
 				var dat = mod.split("|");
 				list.all.push(dat[0]);
 				if (dat[1] == "1")
@@ -211,7 +218,7 @@ class Mods
 			fileStr += values[0] + '|' + (values[1] ? '1' : '0');
 		}
 
-		File.saveContent('modsList.txt', fileStr);
+		File.saveContent(SUtil.getPath() + 'modsList.txt', fileStr);
 		updatedOnState = true;
 		//trace('Saved modsList.txt');
 		#end
